@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#102a2b">
+  <meta name="description" content="SchoolPool: aplicación para organizar y recorrer salidas educativas.">
+  <title>SchoolPool | Salidas educativas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <main id="auth-screen" class="auth-screen">
+    <section class="auth-art">
+      <div class="brand brand-light"><span class="brand-mark">S</span><span>schoolpool</span></div>
+      <div class="auth-copy">
+        <span class="eyebrow">APRENDER TAMBIÉN ES RECORRER</span>
+        <h1>Una salida.<br><em>Mil descubrimientos.</em></h1>
+        <p>Explorá lugares, ubicá cada parada en el mapa y registrá lo que aprendiste durante la experiencia.</p>
+        <div class="auth-points"><span>01 · Explorá</span><span>02 · Descubrí</span><span>03 · Registrá</span></div>
+      </div>
+      <div class="auth-decoration"><span>SP</span></div>
+      <p class="auth-foot">Una herramienta para aprender fuera del aula.</p>
+    </section>
+    <section class="auth-panel">
+      <div class="auth-mobile-brand brand"><span class="brand-mark">S</span><span>schoolpool</span></div>
+      <div class="auth-box">
+        <span class="eyebrow" id="auth-eyebrow">TU ESPACIO EDUCATIVO</span>
+        <h2 id="auth-title">Ingresá a tu cuenta</h2>
+        <p class="muted" id="auth-subtitle">Continuá con el recorrido de tu salida educativa.</p>
+        <form id="login-form" class="form-stack">
+          <label>Email<input id="login-email" type="email" autocomplete="email" placeholder="tu@email.com" required></label>
+          <label>Contraseña<input id="login-password" type="password" autocomplete="current-password" placeholder="Tu contraseña" required minlength="6"></label>
+          <button class="btn btn-primary btn-wide" type="submit">Iniciar sesión <span>→</span></button>
+        </form>
+        <form id="signup-form" class="form-stack hidden">
+          <label>Nombre y apellido<input id="signup-name" type="text" autocomplete="name" placeholder="Cómo te llamás" required maxlength="80"></label>
+          <label>Email<input id="signup-email" type="email" autocomplete="email" placeholder="tu@email.com" required></label>
+          <label>Contraseña<input id="signup-password" type="password" autocomplete="new-password" placeholder="Mínimo 6 caracteres" required minlength="6"></label>
+          <button class="btn btn-primary btn-wide" type="submit">Crear cuenta <span>→</span></button>
+        </form>
+        <p class="auth-switch" id="auth-switch">¿Todavía no tenés cuenta? <button type="button" id="show-signup">Crear una cuenta</button></p>
+        <p class="auth-note">Tus registros personales solo son visibles para vos y para los administradores autorizados.</p>
+      </div>
+    </section>
+  </main>
+
+  <div id="app-screen" class="app-shell hidden">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand sidebar-brand" href="#" aria-label="SchoolPool inicio"><span class="brand-mark">S</span><span>schoolpool</span></a>
+      <div class="side-label">MENÚ PRINCIPAL</div>
+      <nav class="side-nav">
+        <button class="nav-link active" data-view="overview"><span class="nav-icon">⌂</span>Resumen</button>
+        <button class="nav-link" data-view="places"><span class="nav-icon">⌖</span>Lugares</button>
+        <button class="nav-link" data-view="map"><span class="nav-icon">◎</span>Mapa interactivo</button>
+        <button class="nav-link" data-view="activities"><span class="nav-icon">▤</span>Actividades</button>
+        <button class="nav-link" data-view="progress"><span class="nav-icon">↗</span>Mi recorrido</button>
+        <button class="nav-link admin-only hidden" data-view="admin"><span class="nav-icon">⚙</span>Administración</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="help-card"><span class="help-dot"></span><strong>Aprender explorando</strong><p>Consultá los lugares y completá las actividades de la salida.</p></div>
+        <button class="logout-btn" id="logout-btn"><span>↪</span> Cerrar sesión</button>
+      </div>
+    </aside>
+
+    <section class="main-area">
+      <header class="topbar">
+        <button class="mobile-menu" id="mobile-menu" aria-label="Abrir menú">☰</button>
+        <div class="breadcrumb">SchoolPool <span>/</span> <strong id="breadcrumb-current">Resumen</strong></div>
+        <div class="top-user"><div class="avatar" id="user-avatar">E</div><div><strong id="user-name">Estudiante</strong><small id="user-role">Estudiante</small></div></div>
+      </header>
+
+      <div class="page-content">
+        <section class="view active" id="view-overview">
+          <div class="welcome-row">
+            <div><span class="eyebrow">TU SALIDA EDUCATIVA</span><h1 id="trip-title">Prepará tu recorrido</h1><p id="trip-description" class="muted">Todos los lugares y actividades de la experiencia, en un mismo espacio.</p></div>
+            <button class="btn btn-dark" data-go="map">Ver mapa <span>↗</span></button>
+          </div>
+          <div class="stat-grid">
+            <article class="stat-card"><span class="stat-icon mint">⌖</span><div><small>Lugares del recorrido</small><strong id="stat-places">0</strong></div><span class="stat-foot">Para descubrir</span></article>
+            <article class="stat-card"><span class="stat-icon blue">▤</span><div><small>Actividades</small><strong id="stat-activities">0</strong></div><span class="stat-foot">Para realizar</span></article>
+            <article class="stat-card"><span class="stat-icon amber">✓</span><div><small>Completadas</small><strong id="stat-completed">0</strong></div><span class="stat-foot">Tu progreso</span></article>
+          </div>
+          <div class="section-heading"><div><span class="eyebrow">PLANIFICACIÓN</span><h2>Tu recorrido</h2></div><button class="text-link" data-go="places">Ver todos los lugares →</button></div>
+          <div class="overview-grid">
+            <div class="panel route-panel"><div class="panel-head"><div><h3>Paradas de la salida</h3><p class="muted">El orden previsto para visitar cada lugar.</p></div><span class="soft-tag" id="route-count">0 paradas</span></div><div id="route-list" class="route-list"></div></div>
+            <div class="panel mini-map-panel"><div class="panel-head"><div><h3>Ubicaciones</h3><p class="muted">Vista general del recorrido.</p></div><button class="icon-button" data-go="map" aria-label="Abrir mapa">↗</button></div><div id="mini-map" class="mini-map"></div><button class="map-caption" data-go="map">Explorar mapa completo <span>→</span></button></div>
+          </div>
+          <div class="section-heading"><div><span class="eyebrow">PARA EMPEZAR</span><h2>Actividades destacadas</h2></div><button class="text-link" data-go="activities">Ver actividades →</button></div>
+          <div id="featured-activities" class="activity-grid"></div>
+        </section>
+
+        <section class="view" id="view-places">
+          <div class="page-heading"><span class="eyebrow">PUNTOS DE INTERÉS</span><h1>Conocé los lugares</h1><p class="muted">Explorá cada parada antes de llegar y descubrí qué podés aprender allí.</p></div>
+          <div class="toolbar"><div class="search-wrap"><span>⌕</span><input id="place-search" type="search" placeholder="Buscar un lugar..."></div><select id="category-filter" aria-label="Filtrar por categoría"><option value="">Todas las categorías</option></select></div>
+          <div id="places-grid" class="places-grid"></div>
+        </section>
+
+        <section class="view" id="view-map">
+          <div class="page-heading compact-heading"><span class="eyebrow">ORIENTACIÓN</span><h1>Mapa del recorrido</h1><p class="muted">Seleccioná un marcador para consultar la información de cada lugar.</p></div>
+          <div class="map-layout"><div id="main-map" class="main-map"></div><aside class="map-side panel"><div class="panel-head"><div><h3>Lugares señalados</h3><p class="muted">Seleccioná una parada.</p></div><span class="soft-tag" id="map-place-count">0 lugares</span></div><div id="map-place-list" class="map-place-list"></div><div class="map-legend"><span class="legend-dot"></span> Lugar de la salida</div></aside></div>
+          <p class="map-credit">Mapa © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> · Datos abiertos bajo licencia ODbL.</p>
+        </section>
+
+        <section class="view" id="view-detail">
+          <button class="back-link" data-go="places">← Volver a los lugares</button><div id="place-detail"></div>
+        </section>
+
+        <section class="view" id="view-activities">
+          <div class="page-heading"><span class="eyebrow">APRENDIZAJE EN MOVIMIENTO</span><h1>Actividades de la salida</h1><p class="muted">Leé las consignas y registrá cada actividad cuando la hayas realizado.</p></div>
+          <div class="activity-toolbar"><div class="filter-pills" id="activity-filters"><button class="filter-pill active" data-filter="all">Todas</button><button class="filter-pill" data-filter="pending">Pendientes</button><button class="filter-pill" data-filter="done">Completadas</button></div><span class="muted" id="activity-counter"></span></div>
+          <div id="activities-list" class="activities-list"></div>
+        </section>
+
+        <section class="view" id="view-progress">
+          <div class="page-heading"><span class="eyebrow">TU EXPERIENCIA</span><h1>Mi recorrido</h1><p class="muted">Un resumen de las actividades que registraste durante la salida.</p></div>
+          <div class="progress-panel panel"><div class="progress-top"><div><span class="eyebrow">PROGRESO PERSONAL</span><h2 id="progress-fraction">0 de 0 actividades</h2><p class="muted">Cada registro suma a tu experiencia de aprendizaje.</p></div><div class="progress-ring" id="progress-ring"><strong id="progress-percent">0%</strong></div></div><div class="progress-track"><span id="progress-bar"></span></div></div>
+          <div class="section-heading"><div><span class="eyebrow">REGISTROS</span><h2>Mis actividades</h2></div></div><div id="my-completions" class="completion-list"></div>
+        </section>
+
+        <section class="view" id="view-admin">
+          <div class="page-heading"><span class="eyebrow">GESTIÓN DEL CONTENIDO</span><h1>Administración</h1><p class="muted">Agregá lugares y actividades para organizar la salida educativa.</p></div>
+          <div class="admin-grid">
+            <form id="admin-place-form" class="panel admin-form"><div class="panel-head"><div><h3>Agregar un lugar</h3><p class="muted">La ubicación aparecerá en el mapa.</p></div><span class="admin-badge">LUGAR</span></div>
+              <label>Nombre<input name="name" required maxlength="120" placeholder="Ej. Museo de Ciencias"></label>
+              <div class="form-row"><label>Categoría<select name="category"><option>Museo</option><option>Historia</option><option>Ciencia</option><option>Espacio natural</option><option>Deporte</option><option>Otro</option></select></label><label>Orden de visita<input name="visit_order" type="number" min="1" value="5" required></label></div>
+              <label>Dirección<input name="address" required placeholder="Calle, número, localidad"></label>
+              <div class="form-row"><label>Latitud<input name="latitude" type="number" step="any" min="-90" max="90" required placeholder="-34.60"></label><label>Longitud<input name="longitude" type="number" step="any" min="-180" max="180" required placeholder="-58.38"></label></div>
+              <label>Descripción<textarea name="description" rows="3" placeholder="¿Qué van a conocer en este lugar?"></textarea></label>
+              <label>URL de imagen (opcional)<input name="image_url" type="url" placeholder="https://..."></label>
+              <label>URL del sitio web (opcional)<input name="website_url" type="url" placeholder="https://..."></label>
+              <button class="btn btn-primary" type="submit">Guardar lugar <span>＋</span></button>
+            </form>
+            <form id="admin-activity-form" class="panel admin-form"><div class="panel-head"><div><h3>Crear una actividad</h3><p class="muted">Proponé una consigna para los estudiantes.</p></div><span class="admin-badge">ACTIVIDAD</span></div>
+              <label>Lugar relacionado<select name="place_id" id="admin-activity-place"><option value="">Actividad general de la salida</option></select></label>
+              <label>Título<input name="title" required maxlength="140" placeholder="Ej. Registro de observación"></label>
+              <label>Descripción<textarea name="description" rows="3" placeholder="Contá brevemente de qué se trata."></textarea></label>
+              <label>Consigna<textarea name="instructions" rows="4" required placeholder="¿Qué tiene que hacer el estudiante?"></textarea></label>
+              <button class="btn btn-primary" type="submit">Guardar actividad <span>＋</span></button>
+            </form>
+          </div>
+          <div class="panel admin-tip"><span>ⓘ</span><p>Los lugares y actividades se guardan en Supabase y se comparten con los estudiantes que ingresen a SchoolPool.</p></div>
+        </section>
+        <footer class="footer">SchoolPool <span>·</span> Aprender también es recorrer <span class="footer-right">Mapas con OpenStreetMap</span></footer>
+      </div>
+    </section>
+  </div>
+
+  <div id="completion-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-card"><button class="modal-close" id="modal-close" aria-label="Cerrar">×</button><span class="eyebrow">REGISTRAR ACTIVIDAD</span><h2 id="modal-title">¿Completaste la actividad?</h2><p class="muted" id="modal-description"></p><form id="completion-form"><input type="hidden" id="completion-activity-id"><label>Tu observación (opcional)<textarea id="completion-notes" rows="4" maxlength="1000" placeholder="¿Qué aprendiste o qué te llamó la atención?"></textarea></label><button class="btn btn-primary btn-wide" type="submit">Confirmar registro <span>✓</span></button></form></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="script.js"></script>
+</body>
+</html>
