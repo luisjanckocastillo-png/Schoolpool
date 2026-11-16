@@ -405,7 +405,7 @@ function bindEvents() {
 bindEvents();
 showAuth("login");
 
-db.auth.onAuthStateChange(async (_event, session) => {
+db.auth.onAuthStateChange((_event, session) => {
   if (!session?.user) {
     state.user = null;
     state.profile = null;
@@ -414,11 +414,14 @@ db.auth.onAuthStateChange(async (_event, session) => {
     return;
   }
   state.user = session.user;
-  try {
-    await loadData();
-    setView("overview");
-  } catch (error) {
-    console.error(error);
-    toast(error.message || "Error al cargar SchoolPool.", true);
-  }
+  setTimeout(async () => {
+    try {
+      if (!state.user || state.user.id !== session.user.id) return;
+      await loadData();
+      setView("overview");
+    } catch (error) {
+      console.error(error);
+      toast(error.message || "Error al cargar SchoolPool.", true);
+    }
+  }, 0);
 });
