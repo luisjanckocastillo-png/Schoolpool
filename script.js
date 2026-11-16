@@ -134,9 +134,9 @@ function renderRoute(places) {
   $$("#route-list [data-place]").forEach(button => button.addEventListener("click", () => openPlace(button.dataset.place)));
 }
 function placeImage(place, className = "place-image") {
-  const fallback = `<div class="${className}">${escapeHtml((place.name || "S").slice(0, 1).toUpperCase())}</div>`;
-  if (!place.image_url) return fallback;
-  return `<div class="${className}"><img src="${escapeHtml(place.image_url)}" alt="${escapeHtml(place.name)}" loading="lazy" onerror="this.parentElement.innerHTML='${(place.name || "S").slice(0,1)}'"></div>`;
+  const letter = escapeHtml((place.name || "S").slice(0, 1).toUpperCase());
+  if (!place.image_url) return `<div class="${className}">${letter}</div>`;
+  return `<div class="${className}"><span class="image-fallback">${letter}</span><img src="${escapeHtml(place.image_url)}" alt="${escapeHtml(place.name)}" loading="lazy" onerror="this.remove()"></div>`;
 }
 function renderPlaceCards() {
   const search = ($("#place-search")?.value || "").toLowerCase().trim();
@@ -206,8 +206,11 @@ function renderProgress(activities) {
   }).join("") : '<div class="panel" style="padding:22px"><p class="muted">Todavía no registraste actividades. Cuando completes una, aparecerá acá.</p></div>';
 }
 function populateAdminSelects() {
-  const options = orderedPlaces().map(place => `<option value="${place.id}">${escapeHtml(place.name)}</option>`).join("");
+  const places = orderedPlaces();
+  const options = places.map(place => `<option value="${place.id}">${escapeHtml(place.name)}</option>`).join("");
   $("#admin-activity-place").innerHTML = '<option value="">Actividad general de la salida</option>' + options;
+  const orderInput = $('#admin-place-form [name="visit_order"]');
+  if (orderInput && !orderInput.matches(":focus")) orderInput.value = String(places.length + 1);
 }
 function openPlace(id) {
   const place = state.places.find(item => item.id === id);
