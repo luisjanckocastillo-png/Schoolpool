@@ -236,11 +236,13 @@ function initMainMap() {
   if (state.map || !window.L) return;
   state.map = L.map("main-map", { scrollWheelZoom: true }).setView([-34.6037, -58.3816], 12);
   addOsmTiles(state.map);
+  renderMapMarkers();
 }
 function initMiniMap() {
   if (state.miniMap || !window.L) return;
   state.miniMap = L.map("mini-map", { zoomControl: false, scrollWheelZoom: false, dragging: false, doubleClickZoom: false }).setView([-34.6037, -58.3816], 11);
   addOsmTiles(state.miniMap);
+  renderMiniMarkers();
 }
 function addOsmTiles(map) {
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
